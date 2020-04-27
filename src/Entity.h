@@ -6,9 +6,8 @@
 #define PHYSICS_ENTITY_H
 
 #include <map>
+#include <type_traits>
 #include "Components/Component.h"
-
-using namespace std;
 
 class Entity {
 public:
@@ -19,7 +18,12 @@ public:
     void addComponent(Component* component);
     void setComponent(const std::string& componentName, Component* component);
 
-    Component* getComponent(const std::string& componentName);
+    template<typename T>
+    typename std::enable_if<std::is_base_of<Component,T>::value,T*>::type
+    getComponent(const std::string& componentName) {
+        return dynamic_cast<T*>(this->components[componentName]);
+    }
+
 protected:
     map<string, Component*> components;
 };

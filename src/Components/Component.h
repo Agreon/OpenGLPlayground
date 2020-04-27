@@ -13,12 +13,13 @@ using namespace std;
 
 class Component {
 public:
-    virtual void update() = 0;
-    virtual void draw() = 0;
+    virtual ~Component() { }
+    virtual void update(){};
+    virtual void draw(){};
     virtual void addToEntity(Entity* entity) = 0;
 
-    virtual void setEntity(Entity *entity) {
-        this->entity = entity;
+    void setEntity(Entity *_entity) {
+        this->entity = _entity;
     }
 
 protected:

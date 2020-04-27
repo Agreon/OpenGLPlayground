@@ -38,18 +38,18 @@ Scene::Scene(int width, int height) {
     entities.push_back(createEntity(manager, Vec2D(50,148)));
     entities.push_back(createEntity(manager, Vec2D(50,151)));
 
-
+*/
     for(int i = 0; i < 1000; i++){
-        int rX = rand()%width;
-        int rY = rand()%height;
+        float rX = rand()%width;
+        float rY = rand()%height;
 
-        Vec2D vel(rX > width / 2 ? -1 : 1, rY > height / 2 ? -1 : 1);
+        Vec2D vel(rX > width / 2.0 ? -1 : 1, rY > height / 2.0 ? -1 : 1);
         entities.push_back(createEntity(manager, Vec2D(rX, rY), vel));
-    }*/
+    }
 }
 
 Scene::~Scene() {
-    for(auto entity: entities){
+    for(const auto& entity: entities) {
         delete entity;
     }
     delete this->manager;
@@ -61,31 +61,30 @@ int nbFrames = 0;
 void Scene::update() {
     auto currentTime = std::time(0);
     nbFrames++;
-    if ( currentTime - lastTime >= 1.0 ){ // If last prinf() was more than 1 sec ago
-        // printf and reset timer
+    if ( currentTime - lastTime >= 1.0 ){
         printf("%f ms/frame\n", 1000.0/double(nbFrames));
         nbFrames = 0;
         lastTime += 1.0;
     }
 
-    for(auto & entity: entities){
+    for(const auto& entity: entities){
         entity->update();
     }
 }
 
-void drawChildren (Box &box){
-    if(box.children.empty()){
-        float centerX = box.left + ((box.right - box.left ) / 2);
-        float centerY = box.top + ((box.bottom - box.top) / 2);
+void drawChildren (Box *box){
+    if(box->children.empty()){
+        float centerX = box->left + ((box->right - box->left ) / 2);
+        float centerY = box->top + ((box->bottom - box->top) / 2);
         glPushMatrix();
         glTranslatef(centerX, centerY, 0);
         glColor3f(0, 1, 0);
-        glutWireCube(box.right - box.left);
+        glutWireCube(box->right - box->left);
         glPopMatrix();
     }
 
-    for(auto child: box.children) {
-        drawChildren(*child);
+    for(const auto& child: box->children) {
+        drawChildren(child);
     }
 }
 
@@ -96,7 +95,7 @@ void Scene::draw() {
         drawChildren(bvhManager->getRoot());
     }
 
-    for(auto entity: entities) {
+    for(const auto& entity: entities) {
         entity->draw();
     }
 }

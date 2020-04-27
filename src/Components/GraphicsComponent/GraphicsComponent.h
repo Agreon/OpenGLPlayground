@@ -13,7 +13,6 @@ const string GRAPHICS_COMPONENT = "GRAPHICS_COMPONENT";
 
 class GraphicsComponent : public Component {
 public:
-    void update() override;
     void draw() override;
     void addToEntity(Entity* entity) override;
 };

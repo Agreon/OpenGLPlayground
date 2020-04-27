@@ -10,6 +10,7 @@ class Vec2D {
 public:
     Vec2D();
     Vec2D(float x, float y);
+    Vec2D operator+(const Vec2D& other) const;
     float x;
     float y;
 };

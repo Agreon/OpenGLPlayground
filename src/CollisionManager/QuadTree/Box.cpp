@@ -23,12 +23,12 @@ Box::Box() {
 /**
  * Checks whether the entity somehow collides with this box
  */
-bool Box::includes(const PhysicsComponent& entity) const {
+bool Box::includes(const PhysicsComponent* entity) const {
     return (
-        (entity.position.x + entity.halfWidth) > this->left &&
-        (entity.position.x - entity.halfWidth) < this->right &&
-        (entity.position.y + entity.halfHeight) > this->top &&
-        (entity.position.y - entity.halfHeight) < this->bottom
+        (entity->position.x + entity->halfWidth) > this->left &&
+        (entity->position.x - entity->halfWidth) < this->right &&
+        (entity->position.y + entity->halfHeight) > this->top &&
+        (entity->position.y - entity->halfHeight) < this->bottom
     );
 }
 

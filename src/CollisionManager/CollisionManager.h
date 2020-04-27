@@ -13,6 +13,7 @@ class PhysicsComponent;
 
 class CollisionManager {
 public:
+    virtual ~CollisionManager() { }
     virtual void registerEntity(PhysicsComponent *entity) = 0;
     virtual vector<PhysicsComponent*> getCollisionObjects(PhysicsComponent *entity) = 0;
 };

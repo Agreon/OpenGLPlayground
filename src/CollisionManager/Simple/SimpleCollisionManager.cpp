@@ -12,7 +12,7 @@ void SimpleCollisionManager::registerEntity(PhysicsComponent *entity) {
 vector<PhysicsComponent*> SimpleCollisionManager::getCollisionObjects(PhysicsComponent *entity) {
     vector<PhysicsComponent*> collisions;
 
-    for(auto e : this->entities){
+    for(const auto& e : this->entities){
         if(e != entity && entity->collides(e)) {
             collisions.push_back(e);
         }

@@ -25,19 +25,14 @@ void PhysicsComponent::update() {
 
     if(this->velocity.x != 0 || this->velocity.y != 0) {
         vector<PhysicsComponent*> collisions = collisionManager->getCollisionObjects(this);
-        for(auto collision: collisions) {
+        for(const auto& collision: collisions) {
             /**
              * ForEach set nextVelocity to calculated value
              */
-            Vec2D direction(this->velocity.x + collision->velocity.x, this->velocity.y + collision->velocity.y);
-            collision->nextVelocity = direction;
+          //  collision->nextVelocity = this->velocity + collision->velocity;
         }
     }
 
-
-}
-
-void PhysicsComponent::draw() {
 
 }
 

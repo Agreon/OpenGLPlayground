@@ -7,8 +7,12 @@
 
 QuadTreeCollisionManager::QuadTreeCollisionManager(const int &depth, const int &sceneWidth,
                                                    const int &sceneHeight) {
-    this->root = Box(nullptr, 0, 0, sceneWidth, sceneHeight);
-    this->constructBoxes(this->root, depth );
+    this->root = new Box(nullptr, 0, 0, sceneWidth, sceneHeight);
+    this->constructBoxes(this->root, depth);
+}
+
+QuadTreeCollisionManager::~QuadTreeCollisionManager() {
+    this->deleteBoxes(this->root);
 }
 
 vector<PhysicsComponent *> QuadTreeCollisionManager::getCollisionObjects(PhysicsComponent *entity) {
@@ -18,7 +22,7 @@ vector<PhysicsComponent *> QuadTreeCollisionManager::getCollisionObjects(Physics
 
     bool checkedAdjacent = false;
 
-    for(auto box : boxes) {
+    for(const auto& box : boxes) {
         float overlapLeft = box->left - (entity->position.x - entity->halfWidth);
         float overlapRight = (entity->position.x + entity->halfWidth) - box->right;
         float overlapTop = box->top - (entity->position.y - entity->halfHeight);
@@ -43,7 +47,7 @@ vector<PhysicsComponent *> QuadTreeCollisionManager::getCollisionObjects(Physics
 
             // Delete box from entity-map
             int pos2 = 0;
-            for(int i = 0; i< newBoxes.size(); i++){
+            for(int i = 0; i < newBoxes.size(); i++){
                 if(newBoxes[i] == box) {
                     pos2 = i;
                     break;
@@ -65,11 +69,11 @@ vector<PhysicsComponent *> QuadTreeCollisionManager::getCollisionObjects(Physics
         vector<Vec2D> searchPoints = generateSearchPointsForAdjacentBoxes(box, entity, overlapLeft, overlapRight, overlapTop, overlapBottom);
 
         // Find searched boxes
-        for(auto point : searchPoints) {
+        for(const auto& point : searchPoints) {
             // TODO: Can this be done better?
             // Filter search by existing boxes
             bool foundExistingBox = false;
-            for(auto existingBox : newBoxes) {
+            for(const auto& existingBox : newBoxes) {
                 if(existingBox != box && existingBox->includes(point)) {
                     foundExistingBox = true;
                     break;
@@ -92,8 +96,8 @@ vector<PhysicsComponent *> QuadTreeCollisionManager::getCollisionObjects(Physics
     // Check all relevant boxes
     vector<PhysicsComponent*> collisions;
 
-    for(auto box : this->entityBoxes[entity]) {
-        for(auto e : box->entities){
+    for(const auto& box : this->entityBoxes[entity]) {
+        for(const auto& e : box->entities){
             if(e != entity && entity->collides(e)) {
                 collisions.push_back(e);
             }
@@ -117,24 +121,24 @@ vector<Vec2D> QuadTreeCollisionManager::generateSearchPointsForAdjacentBoxes(Box
 
     if(overlapLeft > 0) {
         searchX = originBox->left - overlapLeft;
-        if(searchX > 0 && !(entity->position.y < 0 || entity->position.y > root.bottom)){
+        if(searchX > 0 && !(entity->position.y < 0 || entity->position.y > root->bottom)){
             searchPoints.emplace_back(Vec2D(searchX, entity->position.y));
         }
     } else if(overlapRight > 0) {
         searchX = originBox->right + overlapRight;
-        if(searchX < root.right && !(entity->position.y < 0 || entity->position.y > root.bottom)){
+        if(searchX < root->right && !(entity->position.y < 0 || entity->position.y > root->bottom)){
             searchPoints.emplace_back(Vec2D(searchX, entity->position.y));
         }
     }
 
     if(overlapTop > 0) {
         searchY = originBox->top - overlapTop;
-        if(searchY > 0 && !(entity->position.x < 0 || entity->position.x > root.right)) {
+        if(searchY > 0 && !(entity->position.x < 0 || entity->position.x > root->right)) {
             searchPoints.emplace_back(Vec2D(entity->position.x, searchY));
         }
     } else if(overlapBottom > 0) {
         searchY = originBox->bottom + overlapBottom;
-        if (searchY < root.bottom && !(entity->position.x < 0 || entity->position.x > root.right)){
+        if (searchY < root->bottom && !(entity->position.x < 0 || entity->position.x > root->right)){
             searchPoints.emplace_back(Vec2D(entity->position.x, searchY));
         }
     }
@@ -150,14 +154,12 @@ vector<Vec2D> QuadTreeCollisionManager::generateSearchPointsForAdjacentBoxes(Box
 
 /**
  * Searches the tree upward for a box containing the searched point.
- * @param originBox
- * @param point
  * @return The Box containing the point
  */
 Box* QuadTreeCollisionManager::findBoxByPointUpward(Box *originBox, const Vec2D &point) {
     vector<Box*> &siblings = originBox->parent->children;
 
-    for(auto sibling : siblings) {
+    for(const auto& sibling : siblings) {
         if(originBox != sibling && sibling->includes(point)){
             // Otherwise we have to search downward
             return findBoxByPointDownward(sibling, point);
@@ -170,8 +172,6 @@ Box* QuadTreeCollisionManager::findBoxByPointUpward(Box *originBox, const Vec2D 
 
 /**
  * Searches the tree downward for a box containing the searched point.
- * @param originBox
- * @param point
  * @return The Box containing the point
  */
 Box* QuadTreeCollisionManager::findBoxByPointDownward(Box *parent, const Vec2D& point){
@@ -179,7 +179,7 @@ Box* QuadTreeCollisionManager::findBoxByPointDownward(Box *parent, const Vec2D& 
         return parent;
     }
 
-    for(auto child : parent->children) {
+    for(const auto& child : parent->children) {
         if(child->includes(point)) {
             return findBoxByPointDownward(child, point);
         }
@@ -188,47 +188,57 @@ Box* QuadTreeCollisionManager::findBoxByPointDownward(Box *parent, const Vec2D& 
     return nullptr;
 }
 
-void QuadTreeCollisionManager::constructBoxes(Box &parent, const int &depth) {
+void QuadTreeCollisionManager::constructBoxes(Box *parent, const int &depth) {
 
-    float boxWidth = (parent.right - parent.left) / 2;
-    float boxHeight = (parent.bottom - parent.top) / 2;
+    float boxWidth = (parent->right - parent->left) / 2;
+    float boxHeight = (parent->bottom - parent->top) / 2;
 
     // Upper Left
-    parent.children.push_back(new Box(&parent, parent.left, parent.top, parent.left + boxWidth, parent.bottom - boxHeight));
+    parent->children.push_back(new Box(parent, parent->left, parent->top, parent->left + boxWidth, parent->bottom - boxHeight));
     // Upper Right
-    parent.children.push_back(new Box(&parent, parent.left + boxWidth, parent.top, parent.right, parent.bottom - boxHeight));
+    parent->children.push_back(new Box(parent, parent->left + boxWidth, parent->top, parent->right, parent->bottom - boxHeight));
     // Lower Left
-    parent.children.push_back(new Box(&parent, parent.left, parent.top + boxHeight, parent.left + boxWidth, parent.bottom));
+    parent->children.push_back(new Box(parent, parent->left, parent->top + boxHeight, parent->left + boxWidth, parent->bottom));
     // Lower Right
-    parent.children.push_back(new Box(&parent, parent.left + boxWidth, parent.top + boxHeight, parent.right, parent.bottom));
+    parent->children.push_back(new Box(parent, parent->left + boxWidth, parent->top + boxHeight, parent->right, parent->bottom));
 
     if(depth > 1){
-        for(auto child: parent.children){
-            this->constructBoxes(*child, depth - 1);
+        for(const auto& child: parent->children){
+            this->constructBoxes(child, depth - 1);
         }
     }
+}
+
+void QuadTreeCollisionManager::deleteBoxes(Box *parent) {
+    if(parent->children.empty()) {
+        delete parent;
+        return;
+    }
+
+    for(const auto& child : parent->children) {
+        deleteBoxes(child);
+    }
+    delete parent;
 }
 
 void QuadTreeCollisionManager::registerEntity(PhysicsComponent *entity) {
     this->assignEntityToBox(entity, this->root);
 }
 
-
-void QuadTreeCollisionManager::assignEntityToBox(PhysicsComponent *entity, Box &parent) {
-    if(parent.children.empty()) {
-        parent.addEntity(entity);
-        this->entityBoxes[entity].push_back(&parent);
+void QuadTreeCollisionManager::assignEntityToBox(PhysicsComponent *entity, Box *parent) {
+    if(parent->children.empty()) {
+        parent->addEntity(entity);
+        this->entityBoxes[entity].push_back(parent);
         return;
     }
 
-    for(auto child : parent.children) {
-        if(child->includes(*entity)) {
-            assignEntityToBox(entity, *child);
+    for(const auto& child : parent->children) {
+        if(child->includes(entity)) {
+            assignEntityToBox(entity, child);
         }
     }
 }
 
-Box &QuadTreeCollisionManager::getRoot() {
+Box* QuadTreeCollisionManager::getRoot() {
     return root;
 }
-

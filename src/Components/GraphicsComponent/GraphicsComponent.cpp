@@ -4,17 +4,14 @@
 
 #include <GL/gl.h>
 #include <GL/freeglut.h>
+
 #include "GraphicsComponent.h"
 #include "../PhysicsComponent/PhysicsComponent.h"
 #include "../../Entity.h"
 
 
-void GraphicsComponent::update() {
-}
-
 void GraphicsComponent::draw() {
-    Component* comp = entity->getComponent(PHYSICS_COMPONENT);
-    auto body = dynamic_cast<PhysicsComponent*>(comp);
+    auto body = entity->getComponent<PhysicsComponent>(PHYSICS_COMPONENT);
 
     glPushMatrix();
     glTranslatef(body->position.x, body->position.y, 0);

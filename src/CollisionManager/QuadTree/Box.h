@@ -13,7 +13,7 @@ public:
     Box();
     Box(Box* parent, const float& left, const float& top, const float& right, const float& bottom);
 
-    bool includes(const PhysicsComponent& entity) const;
+    bool includes(const PhysicsComponent* entity) const;
     bool includes(const Vec2D& point) const;
 
     void addEntity(PhysicsComponent* entity);

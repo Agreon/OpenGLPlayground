@@ -15,3 +15,7 @@ Vec2D::Vec2D(float x, float y) {
     this->y = y;
 }
 
+Vec2D Vec2D::operator+(const Vec2D& other) const {
+    return {x + other.x, y + other.y};
+}
+

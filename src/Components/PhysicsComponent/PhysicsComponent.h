@@ -15,7 +15,6 @@ class PhysicsComponent : public Component {
 public:
     PhysicsComponent(CollisionManager* collisionManager, const Vec2D& position, const Vec2D& velocity = Vec2D(), const float& mass = 1.0);
     void update() override;
-    void draw() override;
     void addToEntity(Entity* entity) override;
 
     virtual bool collides(PhysicsComponent* other);
